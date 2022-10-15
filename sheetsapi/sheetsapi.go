@@ -104,20 +104,6 @@ func (p passwordDBImpl) CreatePassword(site, username, password string) error {
 		return err
 	}
 
-	//_, err = p.srv.Spreadsheets.BatchUpdate(p.sheetId, &sheets.BatchUpdateSpreadsheetRequest{
-	//	Requests: []*sheets.Request{
-	//		{
-	//			AppendDimension: &sheets.AppendDimensionRequest{
-	//				Dimension: "ROWS",
-	//				Length:    1,
-	//				SheetId:   0,
-	//			},
-	//		},
-	//	},
-	//}).Do()
-	//if err != nil {
-	//	return err
-	//}
 	_, err = p.srv.Spreadsheets.Values.Append(p.sheetId, "A:C",
 		&sheets.ValueRange{Range: "A:C", Values: [][]interface{}{{site, username, password}}}).
 		Do(googleapi.QueryParameter("insertDataOption", "INSERT_ROWS"),
