@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/bakyazi/gopass/config"
 	"github.com/bakyazi/gopass/sheetsapi"
 	"github.com/spf13/cobra"
 )
@@ -20,10 +21,13 @@ var deleteCmd = &cobra.Command{
 			fmt.Println("Cannot parse 'username' flag", err.Error())
 		}
 
-		db, err := sheetsapi.NewPasswordDB("credentials.local.json", "1u8W_mNDPl8xRsl2YPrqk46I2oOZ_NDnZUpFThRGMo5A")
+		cfg := config.GetConfig()
+
+		db, err := sheetsapi.NewPasswordDB(cfg.CredentialFile, cfg.SheetId)
 		if err != nil {
 			panic(err)
 		}
+
 		err = db.DeletePassword(site, username)
 		if err != nil {
 			fmt.Println("Failed to create and save passwords", err.Error())

@@ -24,6 +24,7 @@ type PasswordDB interface {
 	CreatePassword(site, username, password string) error
 	UpdatePassword(site, username, password string) error
 	DeletePassword(site, username string) error
+	Clear() error
 }
 
 type PasswordEntry struct {
@@ -57,7 +58,18 @@ func (p *passwordDBImpl) GetSites() ([]string, error) {
 }
 
 func (p passwordDBImpl) GetPasswords(page, pageSize int) ([]PasswordEntry, error) {
+	sht, err := p.srv.Spreadsheets.Get(p.sheetId).Do()
+	if err != nil {
+		return nil, err
+	}
+	maxRow := sht.Sheets[0].Properties.GridProperties.RowCount
 	start, end := calculateRange(page, pageSize)
+	if maxRow < int64(end) {
+		end = int(maxRow)
+	}
+	if start > end {
+		return nil, nil
+	}
 	resp, err := p.srv.Spreadsheets.Values.Get(p.sheetId, fmt.Sprintf("A%d:C%d", start, end)).Do()
 	if err != nil {
 		return nil, err
@@ -91,6 +103,21 @@ func (p passwordDBImpl) CreatePassword(site, username, password string) error {
 	if !errors.Is(err, ErrNotFound) {
 		return err
 	}
+
+	//_, err = p.srv.Spreadsheets.BatchUpdate(p.sheetId, &sheets.BatchUpdateSpreadsheetRequest{
+	//	Requests: []*sheets.Request{
+	//		{
+	//			AppendDimension: &sheets.AppendDimensionRequest{
+	//				Dimension: "ROWS",
+	//				Length:    1,
+	//				SheetId:   0,
+	//			},
+	//		},
+	//	},
+	//}).Do()
+	//if err != nil {
+	//	return err
+	//}
 	_, err = p.srv.Spreadsheets.Values.Append(p.sheetId, "A:C",
 		&sheets.ValueRange{Range: "A:C", Values: [][]interface{}{{site, username, password}}}).
 		Do(googleapi.QueryParameter("insertDataOption", "INSERT_ROWS"),
@@ -124,6 +151,23 @@ func (p passwordDBImpl) DeletePassword(site string, username string) error {
 						Dimension:  "ROWS",
 						StartIndex: int64(val.Row - 1),
 						EndIndex:   int64(val.Row),
+					},
+				},
+			},
+		},
+	}).Do()
+	return err
+}
+
+func (p passwordDBImpl) Clear() error {
+	_, err := p.srv.Spreadsheets.BatchUpdate(p.sheetId, &sheets.BatchUpdateSpreadsheetRequest{
+		Requests: []*sheets.Request{
+			{
+				DeleteDimension: &sheets.DeleteDimensionRequest{
+					Range: &sheets.DimensionRange{
+						SheetId:    0,
+						Dimension:  "ROWS",
+						StartIndex: 1,
 					},
 				},
 			},
