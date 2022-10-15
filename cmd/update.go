@@ -11,7 +11,8 @@ import (
 )
 
 var updateCmd = &cobra.Command{
-	Use: "update",
+	Use:   "update",
+	Short: "Update the password from DB",
 	Run: func(cmd *cobra.Command, args []string) {
 
 		site, err := cmd.Flags().GetString("site")

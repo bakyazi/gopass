@@ -10,7 +10,8 @@ import (
 )
 
 var listCmd = &cobra.Command{
-	Use: "list",
+	Use:   "list",
+	Short: "List all passwords from DB",
 	Run: func(cmd *cobra.Command, args []string) {
 		cfg := config.GetConfig()
 

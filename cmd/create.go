@@ -11,7 +11,8 @@ import (
 )
 
 var createCmd = &cobra.Command{
-	Use: "create",
+	Use:   "create",
+	Short: "Insert new password into DB",
 	Run: func(cmd *cobra.Command, args []string) {
 
 		site, err := cmd.Flags().GetString("site")

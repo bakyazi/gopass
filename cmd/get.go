@@ -9,7 +9,8 @@ import (
 )
 
 var getCmd = &cobra.Command{
-	Use: "get",
+	Use:   "get",
+	Short: "Get the password from DB",
 	Run: func(cmd *cobra.Command, args []string) {
 
 		site, err := cmd.Flags().GetString("site")

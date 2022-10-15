@@ -8,7 +8,8 @@ import (
 )
 
 var clearCmd = &cobra.Command{
-	Use: "clear",
+	Use:   "clear",
+	Short: "Clear password database",
 	Run: func(cmd *cobra.Command, args []string) {
 
 		cfg := config.GetConfig()
