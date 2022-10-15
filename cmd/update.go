@@ -4,8 +4,10 @@ import (
 	"fmt"
 	"github.com/atotto/clipboard"
 	"github.com/bakyazi/gopass/config"
+	"github.com/bakyazi/gopass/passgen"
 	"github.com/bakyazi/gopass/sheetsapi"
 	"github.com/spf13/cobra"
+	"os"
 )
 
 var updateCmd = &cobra.Command{
@@ -27,14 +29,17 @@ var updateCmd = &cobra.Command{
 			fmt.Println("Cannot parse 'password' flag", err.Error())
 		}
 
-		auto, err := cmd.Flags().GetBool("auto")
+		auto, err := cmd.Flags().GetString("auto")
 		if err != nil {
 			fmt.Println("Cannot parse 'auto' flag", err.Error())
 		}
 
-		if auto {
-			// TODO implement password generator
-			password = "auto-generated-password"
+		if auto != "" {
+			password, err = passgen.Generate(auto)
+			if err != nil {
+				fmt.Println("Cannot generate password", err.Error())
+				os.Exit(1)
+			}
 		}
 
 		if password == "" {
@@ -76,6 +81,6 @@ func init() {
 
 	updateCmd.Flags().String("password", "", "Enter password")
 
-	updateCmd.Flags().Bool("auto", false, "Enter auto flag to generate password")
+	updateCmd.Flags().String("auto", "", "Enter auto flag to generate password")
 
 }
